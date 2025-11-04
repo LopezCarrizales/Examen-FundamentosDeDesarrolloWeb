@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Benjamín Iván López Carrizales" />
+    <title>Calculadora</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: rgb(254, 123, 75);
+      }
+
+      main {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .carcasa {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30%;
+        height: 80%;
+        border-radius: 1.3rem;
+        background-color: beige;
+      }
+
+      .layout {
+        display: flex;
+        flex-wrap: wrap;
+        height: 90%;
+        width: 90%;
+      }
+
+      .display {
+        display: flex;
+        width: 100%;
+        height: 25%;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .display-contenido {
+        display: flex;
+        width: 90%;
+        height: 50%;
+        align-items: center;
+        justify-content: center;
+        background-color: white;
+        border: solid 3px black;
+        border-radius: 1rem;
+      }
+
+      .contenido {
+        display: flex;
+        align-items: center;
+        justify-content: right;
+        width: 90%;
+        height: 100%;
+        font-size: 34px;
+        font-weight: 800;
+        text-align: right;
+      }
+
+      .teclas {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        height: 75%;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .teclas-fila {
+        display: flex;
+        width: 100%;
+        height: 15%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+      }
+
+      .tecla {
+        display: inline-flex;
+        background-color: gray;
+        width: 20%;
+        height: 80%;
+        border-radius: 1rem;
+        color: white;
+        align-items: center;
+        justify-content: center;
+        font-weight: 1000;
+        font-size: 24px;
+        box-shadow: 0 3px 1px black;
+      }
+
+      .tecla:hover {
+        background-color: rgb(150, 150, 150);
+      }
+
+      .tecla-numero {
+        background-color: white;
+        color: gray;
+      }
+
+      .tecla-numero:hover {
+        background-color: rgb(237, 237, 237);
+      }
+
+      .tecla-0 {
+        width: 60%;
+      }
+
+      .fila-ultima {
+        width: 75%;
+      }
+
+      .tecla-igual {
+        margin-top: 23%;
+        height: 220%;
+      }
+    </style>
+    
+  </head>
+  <body>
+
+    <main>
+      <div class="carcasa">
+        <div class="layout">
+          <div class="display">
+            <div class="display-contenido">
+              <p class="contenido"></p>
+            </div>
+          </div>
+          <div class="teclas">
+            <div class="teclas-fila">
+              <div class="tecla">C</div>
+              <div class="tecla">CE</div>
+              <div class="tecla">/</div>
+              <div class="tecla">*</div>
+            </div>
+            <div class="teclas-fila">
+              <div class="tecla tecla-numero">7</div>
+              <div class="tecla tecla-numero">8</div>
+              <div class="tecla tecla-numero">9</div>
+              <div class="tecla">-</div>
+            </div>
+            <div class="teclas-fila">
+              <div class="tecla tecla-numero">4</div>
+              <div class="tecla tecla-numero">5</div>
+              <div class="tecla tecla-numero">6</div>
+              <div class="tecla">+</div>
+            </div>
+            <div class="teclas-fila">
+              <div class="tecla tecla-numero">1</div>
+              <div class="tecla tecla-numero">2</div>
+              <div class="tecla tecla-numero">3</div>
+              <div class="tecla tecla-igual">=</div>
+            </div>
+            <div class="teclas-fila fila-ultima">
+              <div class="tecla tecla-numero tecla-0">0</div>
+              <div class="tecla">.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const pantalla = document.querySelector(".contenido");
+        const teclas = document.querySelectorAll(".tecla");
+
+        let numeroActual = "0";
+        let numeroAnterior = "";
+        let operacion = null;
+        let reiniciarPantalla = false;
+
+        teclas.forEach((tecla) => {
+          tecla.addEventListener("click", () => {
+            manejarEntrada(tecla.innerText);
+          });
+        });
+
+        function manejarEntrada(valorTecla) {
+          if (numeroActual === "ERROR") {
+            limpiarTodo();
+            if (valorTecla < "0" || valorTecla > "9") return;
+          }
+
+          if (valorTecla >= "0" && valorTecla <= "9") {
+            agregarNumero(valorTecla);
+          } else if (valorTecla === ".") {
+            agregarDecimal();
+          } else if (["+", "-", "*", "/"].includes(valorTecla)) {
+            elegirOperacion(valorTecla);
+          } else if (valorTecla === "=") {
+            calcular();
+          } else if (valorTecla === "C") {
+            limpiarTodo();
+          } else if (valorTecla === "CE") {
+            limpiarEntrada();
+          }
+
+          if (numeroActual !== "ERROR") {
+            actualizarPantalla();
+          }
+        }
+
+        function agregarNumero(numero) {
+          if (numeroActual === "0" || reiniciarPantalla) {
+            numeroActual = numero;
+            reiniciarPantalla = false;
+          } else {
+            numeroActual += numero;
+          }
+        }
+
+        function agregarDecimal() {
+          if (reiniciarPantalla) {
+            numeroActual = "0.";
+            reiniciarPantalla = false;
+            return;
+          }
+          if (numeroActual.includes(".")) return;
+          numeroActual += ".";
+        }
+
+        function elegirOperacion(op) {
+          if (numeroActual === "" && numeroAnterior === "") return;
+
+          if (numeroActual === "" && numeroAnterior !== "") {
+            operacion = op;
+            return;
+          }
+
+          if (numeroAnterior !== "") {
+            calcular();
+            if (numeroActual === "ERROR") return;
+          }
+
+          operacion = op;
+          numeroAnterior = numeroActual;
+          reiniciarPantalla = true;
+        }
+
+        function calcular() {
+          if (operacion === null || numeroAnterior === "") return;
+
+          let resultado;
+          const previo = parseFloat(numeroAnterior);
+          const actual = parseFloat(numeroActual);
+
+          if (isNaN(previo) || isNaN(actual)) return;
+
+          if (operacion === "/" && actual === 0) {
+            pantalla.innerText = "ERROR";
+            numeroActual = "ERROR";
+            operacion = null;
+            numeroAnterior = "";
+            reiniciarPantalla = true;
+            return;
+          }
+
+          switch (operacion) {
+            case "+":
+              resultado = previo + actual;
+              break;
+            case "-":
+              resultado = previo - actual;
+              break;
+            case "*":
+              resultado = previo * actual;
+              break;
+            case "/":
+              resultado = previo / actual;
+              break;
+            default:
+              return;
+          }
+
+          numeroActual = resultado.toString();
+          operacion = null;
+          numeroAnterior = "";
+          reiniciarPantalla = true;
+        }
+
+        function limpiarTodo() {
+          numeroActual = "0";
+          numeroAnterior = "";
+          operacion = null;
+          reiniciarPantalla = false;
+        }
+
+        function limpiarEntrada() {
+          numeroActual = "0";
+          reiniciarPantalla = false;
+        }
+
+        function actualizarPantalla() {
+          if (numeroActual === "" || numeroActual === "-") {
+            pantalla.innerText = "0";
+          } else {
+            pantalla.innerText = numeroActual;
+          }
+        }
+
+        actualizarPantalla();
+      });
+    </script>
+  </body>
+</html>
